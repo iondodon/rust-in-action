@@ -21,6 +21,11 @@ impl LinkedList {
         LinkedList { head: None, tail: None }
     }
 
+    fn init_first(&mut self, node_rc_refcell: Rc<RefCell<Node>>) {
+        self.head = Some(node_rc_refcell.clone());
+        self.tail = Some(node_rc_refcell.clone());
+    }
+
     fn add_to_tail(&mut self, new_node: Node) {
         let node_rc_refcell = Rc::new(RefCell::new(new_node));
 
@@ -30,10 +35,20 @@ impl LinkedList {
                 tail.clone().borrow_mut().next = Some(node_rc_refcell.clone());
                 self.tail = Some(node_rc_refcell.clone());
             }
-            None => {
+            None => self.init_first(node_rc_refcell)
+        }
+    }
+
+    fn add_to_head(&mut self, new_node: Node) {
+        let node_rc_refcell = Rc::new(RefCell::new(new_node));
+
+        match &self.head {
+            Some(head) => {
+                node_rc_refcell.clone().borrow_mut().next = Some(head.clone());
+                head.clone().borrow_mut().prev = Some(node_rc_refcell.clone());
                 self.head = Some(node_rc_refcell.clone());
-                self.tail = Some(node_rc_refcell.clone());
             }
+            None => self.init_first(node_rc_refcell)
         }
     }
 }
@@ -45,7 +60,7 @@ fn main() {
     linked_list.add_to_tail(node1);
 
     let node2 = Node { val: 22, prev: None, next: None };
-    linked_list.add_to_tail(node2);
+    linked_list.add_to_head(node2);
 
     let node3 = Node { val: 23, prev: None, next: None };
     linked_list.add_to_tail(node3);
