@@ -1,34 +1,31 @@
-#[warn(dead_code)]
+#![allow(dead_code)]
+
 struct MyList<'a, T> {
-    elements: &'a [T],
+    elements: &'a mut [&'a mut T],
 }
 
-impl<'a> Default for MyList<'a, i32> {
-    fn default() -> Self {
-        MyList {
-            elements: &[1, 2, 3, 4, 5],
-        }
-    }
-}
+impl<'a, T> Iterator for MyList<'a, T> {
+    type Item = &'a mut T;
 
-impl<'a> Iterator for MyList<'a, i32> {
-    type Item = i32;
-
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next<'next>(&'next mut self) -> Option<Self::Item> {
         if self.elements.len() == 0 {
             return None;
         }
 
-        let element = Some(self.elements[0]);
+        let element: Self::Item = self.elements[0];
 
-        self.elements = &self.elements[1..];
-
-        element
+        Some(element)
     }
 }
 
 fn main() {
-    for e in MyList::default() {
+    let mut e1 = 1;
+    let mut e2 = 2;
+
+    let list = MyList { elements: &mut [&mut e1, &mut e2] };
+
+    for e in list {
+        *e = *e + 1;
         print!("{:?} ", e);
     }
 }
